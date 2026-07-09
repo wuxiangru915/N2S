@@ -1,0 +1,12 @@
+services:
+  n2s:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Use "mock" for a zero-API-key smoke test.
+      # Switch to "openai", "anthropic", or "ollama" and set the matching key.
+      - N2S_LLM_PROVIDER=mock
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - OLLAMA_HOST=http://host.docker.internal:11434

@@ -1,0 +1,57 @@
+{
+  "name": "@n2s/webcomponent",
+  "version": "0.1.0",
+  "description": "Lit-based web components for N2S Natural-to-SQL Agent",
+  "main": "dist/n2s-components.js",
+  "scripts": {
+    "sync-version": "node scripts/sync-version.js",
+    "dev": "vite",
+    "build": "npm run sync-version && tsc && vite build",
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "n2s",
+    "ai",
+    "sql",
+    "web-components",
+    "lit",
+    "chat",
+    "llm",
+    "natural-language"
+  ],
+  "author": "N2S Contributors",
+  "license": "MIT",
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/n2s-ai/n2s.git",
+    "directory": "frontends/webcomponent"
+  },
+  "homepage": "https://github.com/n2s-ai/n2s",
+  "bugs": {
+    "url": "https://github.com/n2s-ai/n2s/issues"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "lit": "^3.3.1",
+    "plotly.js-dist-min": "^3.1.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-actions": "^8.6.14",
+    "@storybook/addon-controls": "^8.6.14",
+    "@storybook/addon-docs": "^8.6.14",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/web-components": "^8.6.14",
+    "@storybook/web-components-vite": "^8.6.14",
+    "@types/plotly.js-dist-min": "^2.3.4",
+    "storybook": "^8.6.14",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}

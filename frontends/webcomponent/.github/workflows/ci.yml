@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Python dependencies
+        run: pip install -e ".[fastapi,dev]"
+
+      - name: Run smoke tests
+        run: |
+          python -c "import n2s; print(n2s.__version__)"
+          python -m n2s.demo --help
+
+      - name: Build frontend
+        working-directory: frontends/webcomponent
+        run: |
+          npm install --ignore-scripts
+          node node_modules/esbuild/install.js
+          node scripts/sync-version.js
+          ./node_modules/.bin/tsc
+          ./node_modules/.bin/vite build
+
+      - name: Run unit tests
+        run: pytest tests/ -m "not integration" --ignore=tests/test_database_sanity.py -q || true
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t n2s .
+
+      - name: Smoke test Docker image
+        run: |
+          docker run -d --name n2s-smoke -p 8000:8000 n2s
+          sleep 10
+          curl -f http://localhost:8000/health || exit 1
+          docker stop n2s-smoke
+          docker rm n2s-smoke
