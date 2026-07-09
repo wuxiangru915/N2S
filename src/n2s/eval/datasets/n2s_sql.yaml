@@ -1,0 +1,49 @@
+dataset:
+  name: N2S Employees SQL Benchmark
+  description: |
+    Small reproducible benchmark for the N2S demo database.
+    Tests natural-language-to-SQL accuracy on the employees table.
+  test_cases:
+    - id: emp_count
+      message: How many employees are in the database?
+      expected_outcome:
+        tools_called: ["run_sql"]
+        final_answer_contains: ["6"]
+        metadata:
+          expected_sql: SELECT COUNT(*) FROM employees
+          expected_result: 6
+
+    - id: emp_max_salary
+      message: What is the highest salary?
+      expected_outcome:
+        tools_called: ["run_sql"]
+        final_answer_contains: ["130000"]
+        metadata:
+          expected_sql: SELECT MAX(salary) FROM employees
+          expected_result: 130000
+
+    - id: emp_total_salary
+      message: What is the total payroll?
+      expected_outcome:
+        tools_called: ["run_sql"]
+        final_answer_contains: ["620000"]
+        metadata:
+          expected_sql: SELECT SUM(salary) FROM employees
+          expected_result: 620000
+
+    - id: emp_engineering_count
+      message: How many employees work in Engineering?
+      expected_outcome:
+        tools_called: ["run_sql"]
+        final_answer_contains: ["3"]
+        metadata:
+          expected_sql: SELECT COUNT(*) FROM employees WHERE department = 'Engineering'
+          expected_result: 3
+
+    - id: emp_avg_salary_by_dept
+      message: What is the average salary by department?
+      expected_outcome:
+        tools_called: ["run_sql"]
+        final_answer_contains: ["average"]
+        metadata:
+          expected_sql: SELECT department, AVG(salary) FROM employees GROUP BY department
