@@ -1,0 +1,55 @@
+.venv/
+claude_data/
+n2s_demo_data/
+demo.db
+n2s_demo.db
+rebrand.py
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+*.egg-info/
+build/
+dist/
+
+# Frontend builds and dependencies
+frontends/**/node_modules/
+frontends/**/dist/
+frontends/**/static/
+frontends/**/.storybook-static/
+frontends/**/package-lock.json
+frontends/**/.mypy_cache/
+
+# Generated legacy assets (rebuilt from frontend build)
+src/n2s/legacy/flask/assets.py
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test / CI artifacts
+.playwright-cli/
+.coverage
+htmlcov/
+*.log
+
+# AI assistant working artifacts
+.trae-html-share-packages/
+github-readiness-evaluation/
+.understand-anything/
+
+# Screenshots (development artifacts)
+screenshot-*.png
+.projectn2sscreenshot-*.png

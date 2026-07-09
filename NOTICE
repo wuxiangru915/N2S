@@ -1,0 +1,11 @@
+N2S (Natural-to-SQL Agent)
+
+This project is a derivative work based on Vanna (https://github.com/vanna-ai/vanna),
+developed by Vanna.AI and contributors.
+
+Vanna is used under the MIT License. The original copyright notice is retained in
+LICENSE.
+
+This project modifies and extends Vanna's code to build a dedicated Natural-to-SQL
+agent demo with additional tools, evaluation harness, and documentation for
+portfolio purposes.
