@@ -17,7 +17,7 @@
 
 ---
 
-N2S 是一个开源的**自然语言转 SQL **智能体。基于 [Vanna](https://github.com/vanna-ai/vanna) 2.0 智能体框架构建，在原版基础上增强了工具调用、多轮推理、数据导入管道和内置 Text2SQL 基准测试。
+N2S 是一个开源的**自然语言转 SQL**智能体。基于 [Vanna](https://github.com/vanna-ai/vanna) 2.0 智能体框架构建，在原版基础上增强了工具调用、多轮推理、数据导入管道和内置 Text2SQL 基准测试。
 
 > N2S 是衍生项目，保留了 Vanna 的 MIT 许可证和所有原始版权声明。归属信息详见 [NOTICE](./NOTICE)。
 
