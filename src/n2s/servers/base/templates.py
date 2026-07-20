@@ -21,9 +21,7 @@ def get_n2s_component_script(
         HTML script tag for loading components
     """
     if dev_mode:
-        return (
-            f'<script type="module" src="{static_path}/n2s-components.js"></script>'
-        )
+        return f'<script type="module" src="{static_path}/n2s-components.js"></script>'
     else:
         return f'<script type="module" src="{cdn_url}"></script>'
 

@@ -83,7 +83,9 @@ def _create_llm_service(provider: str | None = None) -> "LlmService":
         return OpenAILlmService(
             model=os.getenv("MIMO_MODEL", "mimo-v2.5-pro"),
             api_key=os.getenv("MIMO_API_KEY"),
-            base_url=os.getenv("MIMO_BASE_URL", "https://token-plan-cn.xiaomimimo.com/v1"),
+            base_url=os.getenv(
+                "MIMO_BASE_URL", "https://token-plan-cn.xiaomimimo.com/v1"
+            ),
         )
 
     if provider == "mock":

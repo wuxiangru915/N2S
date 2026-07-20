@@ -6,6 +6,7 @@ unnecessary embedding function initialization/model downloads.
 """
 
 import pytest
+
 pytest.importorskip("chromadb")
 import tempfile
 import shutil

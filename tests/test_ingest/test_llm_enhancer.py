@@ -11,11 +11,13 @@ from n2s.ingest.llm_enhancer import LlmSchemaEnhancer
 
 @pytest.fixture
 def sample_df():
-    return pd.DataFrame({
-        "订单号": [1, 2],
-        "商品名称": ["item_a", "item_b"],
-        "金额": [10.0, 20.0],
-    })
+    return pd.DataFrame(
+        {
+            "订单号": [1, 2],
+            "商品名称": ["item_a", "item_b"],
+            "金额": [10.0, 20.0],
+        }
+    )
 
 
 @pytest.fixture
@@ -26,14 +28,16 @@ def base_schema(sample_df):
 
 def test_enhance_with_valid_llm_response(base_schema, sample_df):
     """When LLM returns valid JSON, schema is enhanced."""
-    llm_response = json.dumps({
-        "table_name": "orders",
-        "columns": [
-            {"name": "order_id", "comment": "订单编号"},
-            {"name": "product_name", "comment": "商品名称"},
-            {"name": "amount", "comment": "金额"},
-        ]
-    })
+    llm_response = json.dumps(
+        {
+            "table_name": "orders",
+            "columns": [
+                {"name": "order_id", "comment": "订单编号"},
+                {"name": "product_name", "comment": "商品名称"},
+                {"name": "amount", "comment": "金额"},
+            ],
+        }
+    )
 
     mock_llm = MagicMock()
     mock_llm.complete = AsyncMock(return_value=MagicMock(content=llm_response))

@@ -224,6 +224,7 @@ def ingest(dir_path, file_path, table_name, db_url, mode):
     # Default to the demo SQLite DB
     if db_url is None:
         from ...demo.data import init_demo_db
+
         db_path = init_demo_db()
         db_url = f"sqlite:///{db_path}"
 

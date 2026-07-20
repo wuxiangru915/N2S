@@ -193,7 +193,9 @@ class Agent:
             ):
                 yield component
         except Exception as e:
-            lang = request_context.metadata.get("lang", "zh") if request_context else "zh"
+            lang = (
+                request_context.metadata.get("lang", "zh") if request_context else "zh"
+            )
             # Log full stack trace
             stack_trace = traceback.format_exc()
             logger.error(
@@ -247,7 +249,10 @@ class Agent:
                 rich_component=StatusBarUpdateComponent(
                     status="error",
                     message=_ui_text("Error occurred", lang),
-                    detail=_ui_text("An unexpected error occurred while processing your message", lang),
+                    detail=_ui_text(
+                        "An unexpected error occurred while processing your message",
+                        lang,
+                    ),
                 )
             )
 
@@ -351,7 +356,8 @@ class Agent:
                     )
                     yield UiComponent(  # type: ignore
                         rich_component=ChatInputUpdateComponent(
-                            placeholder=_ui_text("Ask a question...", lang), disabled=False
+                            placeholder=_ui_text("Ask a question...", lang),
+                            disabled=False,
                         )
                     )
 
@@ -514,7 +520,8 @@ class Agent:
                     )
                     yield UiComponent(  # type: ignore
                         rich_component=ChatInputUpdateComponent(
-                            placeholder=_ui_text("Ask a question...", lang), disabled=False
+                            placeholder=_ui_text("Ask a question...", lang),
+                            disabled=False,
                         )
                     )
 
@@ -1055,7 +1062,8 @@ class Agent:
                 # Update chat input placeholder
                 yield UiComponent(  # type: ignore
                     rich_component=ChatInputUpdateComponent(
-                        placeholder=_ui_text("Ask a follow-up question...", lang), disabled=False
+                        placeholder=_ui_text("Ask a follow-up question...", lang),
+                        disabled=False,
                     )
                 )
 
@@ -1111,7 +1119,9 @@ You can:
             # Update chat input to suggest follow-up
             yield UiComponent(  # type: ignore
                 rich_component=ChatInputUpdateComponent(
-                    placeholder=_ui_text("Continue the task or ask me something else...", lang),
+                    placeholder=_ui_text(
+                        "Continue the task or ask me something else...", lang
+                    ),
                     disabled=False,
                 )
             )

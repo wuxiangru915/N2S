@@ -128,9 +128,7 @@ class N2SEvaluationRunner:
 
         evaluation_results: List[EvaluationResult] = []
         for evaluator in self.evaluators:
-            evaluation_results.append(
-                await evaluator.evaluate(test_case, agent_result)
-            )
+            evaluation_results.append(await evaluator.evaluate(test_case, agent_result))
 
         return TestCaseResult(
             test_case=test_case,

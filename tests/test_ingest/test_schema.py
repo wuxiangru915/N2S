@@ -7,11 +7,13 @@ from n2s.ingest.schema import SchemaInferrer, TableSchema
 
 
 def test_infer_basic_types():
-    df = pd.DataFrame({
-        "id": [1, 2, 3],
-        "name": ["alice", "bob", "charlie"],
-        "price": [10.5, 20.0, 30.5],
-    })
+    df = pd.DataFrame(
+        {
+            "id": [1, 2, 3],
+            "name": ["alice", "bob", "charlie"],
+            "price": [10.5, 20.0, 30.5],
+        }
+    )
     inferrer = SchemaInferrer()
     schema = inferrer.infer(df, table_name="products")
 
@@ -26,11 +28,13 @@ def test_infer_basic_types():
 
 
 def test_chinese_column_names_converted_to_pinyin():
-    df = pd.DataFrame({
-        "订单号": [1, 2],
-        "商品名称": ["item_a", "item_b"],
-        "金额": [10.0, 20.0],
-    })
+    df = pd.DataFrame(
+        {
+            "订单号": [1, 2],
+            "商品名称": ["item_a", "item_b"],
+            "金额": [10.0, 20.0],
+        }
+    )
     inferrer = SchemaInferrer()
     schema = inferrer.infer(df, table_name="orders")
 
@@ -44,11 +48,13 @@ def test_chinese_column_names_converted_to_pinyin():
 
 
 def test_special_characters_replaced():
-    df = pd.DataFrame({
-        "user-id": [1],
-        "price$": [10.0],
-        "name!": ["test"],
-    })
+    df = pd.DataFrame(
+        {
+            "user-id": [1],
+            "price$": [10.0],
+            "name!": ["test"],
+        }
+    )
     inferrer = SchemaInferrer()
     schema = inferrer.infer(df, table_name="t")
 
@@ -59,10 +65,12 @@ def test_special_characters_replaced():
 
 
 def test_duplicate_names_after_cleanup():
-    df = pd.DataFrame({
-        "用户": [1, 2],
-        "客\u6237": [3, 4],  # Both map to "yonghu" after pinyin
-    })
+    df = pd.DataFrame(
+        {
+            "用户": [1, 2],
+            "客\u6237": [3, 4],  # Both map to "yonghu" after pinyin
+        }
+    )
     inferrer = SchemaInferrer()
     schema = inferrer.infer(df, table_name="t")
 

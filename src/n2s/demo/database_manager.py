@@ -84,7 +84,7 @@ class DatabaseManager:
                 name="default",
                 db_type="sqlite",
                 db_url=db_url,
-                is_active=True if not self._any_active() else False,
+                is_active=not self._any_active(),
                 is_default=True,
             )
         )

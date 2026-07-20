@@ -3,10 +3,12 @@
 from pathlib import Path
 
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
-from n2s.ingest.routes import register_ingest_routes
+fastapi = pytest.importorskip("fastapi")
+from fastapi import FastAPI  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+from n2s.ingest.routes import register_ingest_routes  # noqa: E402
 
 
 @pytest.fixture

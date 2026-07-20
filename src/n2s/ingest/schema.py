@@ -10,6 +10,7 @@ import pandas as pd
 
 try:
     from pypinyin import lazy_pinyin
+
     _HAS_PYPINYIN = True
 except ImportError:
     _HAS_PYPINYIN = False

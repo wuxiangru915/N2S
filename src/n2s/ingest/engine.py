@@ -172,7 +172,9 @@ class DataIngestor:
                 errors=[{"filename": path.name, "error": str(e)}],
             )
 
-    async def _ingest_one(self, scanned_file, mode: str, file_progress: FileProgress) -> str:
+    async def _ingest_one(
+        self, scanned_file, mode: str, file_progress: FileProgress
+    ) -> str:
         """Process a single file through the full pipeline. Returns table name."""
         # Stage: reading
         file_progress.stage = "reading"
@@ -212,7 +214,9 @@ class DataIngestor:
         return self._loader.get_table_info(table_name)
 
     # Synchronous wrappers for CLI and testing
-    def ingest_directory_sync(self, dir_path: str, mode: str = "replace") -> IngestResult:
+    def ingest_directory_sync(
+        self, dir_path: str, mode: str = "replace"
+    ) -> IngestResult:
         """Sync wrapper for ingest_directory."""
         return asyncio.run(self.ingest_directory(dir_path, mode))
 

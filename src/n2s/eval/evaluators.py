@@ -46,7 +46,9 @@ class SqlExecutionEvaluator(Evaluator):
     def name(self) -> str:
         return "sql_execution"
 
-    async def evaluate(self, test_case: TestCase, agent_result: AgentResult) -> EvaluationResult:
+    async def evaluate(
+        self, test_case: TestCase, agent_result: AgentResult
+    ) -> EvaluationResult:
         expected = test_case.expected_outcome
         if not expected:
             return EvaluationResult(
@@ -133,7 +135,9 @@ class SqlSimilarityEvaluator(Evaluator):
     def name(self) -> str:
         return "sql_similarity"
 
-    async def evaluate(self, test_case: TestCase, agent_result: AgentResult) -> EvaluationResult:
+    async def evaluate(
+        self, test_case: TestCase, agent_result: AgentResult
+    ) -> EvaluationResult:
         expected = test_case.expected_outcome
         if not expected:
             return EvaluationResult(

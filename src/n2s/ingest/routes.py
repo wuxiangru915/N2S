@@ -95,6 +95,4 @@ def register_ingest_routes(
         db_url = _resolve_db_url(None)
         ingestor = DataIngestor(db_url=db_url, llm_service=None)
         tables = ingestor.list_tables()
-        return [
-            ingestor.get_table_info(t) for t in tables
-        ]
+        return [ingestor.get_table_info(t) for t in tables]

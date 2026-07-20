@@ -707,9 +707,7 @@ class TestStarterUI:
         assert "作为管理员" in card.content
         # Should have View Memories button
         assert hasattr(card, "actions")
-        assert any(
-            "查看记忆" in action.get("label", "") for action in card.actions
-        )
+        assert any("查看记忆" in action.get("label", "") for action in card.actions)
 
     @pytest.mark.asyncio
     async def test_starter_ui_admin_without_memory(
@@ -746,8 +744,7 @@ class TestStarterUI:
         assert "Memory ✗" in card.content
         # Should NOT have View Memories button since memory is not available
         memory_button_exists = any(
-            "查看记忆" in action.get("label", "")
-            for action in (card.actions or [])
+            "查看记忆" in action.get("label", "") for action in (card.actions or [])
         )
         assert not memory_button_exists
 

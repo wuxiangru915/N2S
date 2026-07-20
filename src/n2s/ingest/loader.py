@@ -43,16 +43,15 @@ class DatabaseLoader:
             ValueError: If mode is invalid.
         """
         if mode not in ("replace", "append", "fail"):
-            raise ValueError(f"Invalid mode: {mode}. Use 'replace', 'append', or 'fail'.")
+            raise ValueError(
+                f"Invalid mode: {mode}. Use 'replace', 'append', or 'fail'."
+            )
 
         if df.empty:
             return 0
 
         # Rename DataFrame columns to match cleaned schema names
-        rename_map = {
-            orig: col.name
-            for orig, col in zip(df.columns, schema.columns)
-        }
+        rename_map = {orig: col.name for orig, col in zip(df.columns, schema.columns)}
         df = df.rename(columns=rename_map)
 
         df.to_sql(

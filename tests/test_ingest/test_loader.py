@@ -21,11 +21,13 @@ def loader(db_path):
 
 @pytest.fixture
 def sample_df():
-    return pd.DataFrame({
-        "id": [1, 2, 3],
-        "name": ["alice", "bob", "charlie"],
-        "value": [10.5, 20.0, 30.5],
-    })
+    return pd.DataFrame(
+        {
+            "id": [1, 2, 3],
+            "name": ["alice", "bob", "charlie"],
+            "value": [10.5, 20.0, 30.5],
+        }
+    )
 
 
 @pytest.fixture
@@ -46,6 +48,7 @@ def test_load_row_count(loader, sample_df, inferrer):
     loader.load(sample_df, schema, mode="replace")
 
     import sqlalchemy
+
     engine = sqlalchemy.create_engine(loader.db_url)
     with engine.connect() as conn:
         result = conn.exec_driver_sql("SELECT COUNT(*) FROM products")

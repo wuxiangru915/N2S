@@ -58,7 +58,9 @@ def test_query_data_after_ingest(fixtures_dir, db_path):
     count = cursor.fetchone()[0]
     conn.close()
 
-    assert count == 2  # sample.json (2 rows) processed last, overwrites sample.csv (3 rows)
+    assert (
+        count == 2
+    )  # sample.json (2 rows) processed last, overwrites sample.csv (3 rows)
 
 
 def test_table_info_after_ingest(fixtures_dir, db_path):

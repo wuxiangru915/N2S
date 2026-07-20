@@ -79,7 +79,9 @@ class RunSqlTool(Tool[RunSqlToolArgs]):
             if query_type == "SELECT":
                 # Handle SELECT queries with results
                 if df.empty:
-                    result = _sql_ui_text("Query executed successfully. No rows returned.", lang)
+                    result = _sql_ui_text(
+                        "Query executed successfully. No rows returned.", lang
+                    )
                     ui_component = UiComponent(
                         rich_component=DataFrameComponent(
                             rows=[],
@@ -142,10 +144,10 @@ class RunSqlTool(Tool[RunSqlToolArgs]):
                 # For non-SELECT queries (INSERT, UPDATE, DELETE, etc.)
                 # The SqlRunner should return a DataFrame with affected row count
                 rows_affected = len(df) if not df.empty else 0
-                result = (
-                    _sql_ui_text("Query executed successfully. {rows_affected} row(s) affected.", lang)
-                    .format(rows_affected=rows_affected)
-                )
+                result = _sql_ui_text(
+                    "Query executed successfully. {rows_affected} row(s) affected.",
+                    lang,
+                ).format(rows_affected=rows_affected)
 
                 metadata = {"rows_affected": rows_affected, "query_type": query_type}
                 ui_component = UiComponent(

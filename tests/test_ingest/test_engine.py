@@ -44,11 +44,15 @@ def test_ingest_directory_nonexistent(ingestor):
 
 
 def test_ingest_single_file(ingestor, fixtures_dir):
-    result = ingestor.ingest_file_sync(str(fixtures_dir / "sample.csv"), table_name="my_table")
+    result = ingestor.ingest_file_sync(
+        str(fixtures_dir / "sample.csv"), table_name="my_table"
+    )
 
     assert result.success
     assert "my_table" in result.tables_created
-    assert ingestor.list_tables() == ["my_table"] or "my_table" in ingestor.list_tables()
+    assert (
+        ingestor.list_tables() == ["my_table"] or "my_table" in ingestor.list_tables()
+    )
 
 
 def test_progress_tracking(ingestor, fixtures_dir):

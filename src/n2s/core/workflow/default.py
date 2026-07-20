@@ -218,24 +218,32 @@ class DefaultWorkflowHandler(WorkflowHandler):
         if not analysis["has_sql"]:
             title = "Admin: Setup Required" if is_en else "Admin: 需要配置"
             content = (
-                "**🔒 Admin View** - You have admin privileges and will see additional system information.\n\n"
-                "**N2S** requires a SQL connection to function.\n\n"
-                "Please configure a SQL tool to get started."
-            ) if is_en else (
-                "**🔒 管理员视图** - 你拥有管理员权限，将看到额外的系统信息。\n\n"
-                "**N2S** 需要配置 SQL 工具后才能工作。\n\n"
-                "请配置 SQL 工具以开始使用。"
+                (
+                    "**🔒 Admin View** - You have admin privileges and will see additional system information.\n\n"
+                    "**N2S** requires a SQL connection to function.\n\n"
+                    "Please configure a SQL tool to get started."
+                )
+                if is_en
+                else (
+                    "**🔒 管理员视图** - 你拥有管理员权限，将看到额外的系统信息。\n\n"
+                    "**N2S** 需要配置 SQL 工具后才能工作。\n\n"
+                    "请配置 SQL 工具以开始使用。"
+                )
             )
             status = "error"
             icon = "⚠️"
         elif analysis["is_complete"]:
             title = "Admin: System Ready" if is_en else "Admin: 系统就绪"
             content = (
-                "**🔒 Admin View** - You have admin privileges and will see additional system information.\n\n"
-                "**N2S** is fully configured and ready.\n\n"
-            ) if is_en else (
-                "**🔒 管理员视图** - 你拥有管理员权限，将看到额外的系统信息。\n\n"
-                "**N2S** 已完全配置并准备就绪。\n\n"
+                (
+                    "**🔒 Admin View** - You have admin privileges and will see additional system information.\n\n"
+                    "**N2S** is fully configured and ready.\n\n"
+                )
+                if is_en
+                else (
+                    "**🔒 管理员视图** - 你拥有管理员权限，将看到额外的系统信息。\n\n"
+                    "**N2S** 已完全配置并准备就绪。\n\n"
+                )
             )
             content += "**Setup:** SQL ✓ | Memory ✓ | Visualization ✓"
             status = "success"
@@ -243,11 +251,15 @@ class DefaultWorkflowHandler(WorkflowHandler):
         else:
             title = "Admin: System Ready" if is_en else "Admin: 系统就绪"
             content = (
-                "**🔒 Admin View** - You have admin privileges and will see additional system information.\n\n"
-                "**N2S** is ready to query your database.\n\n"
-            ) if is_en else (
-                "**🔒 管理员视图** - 你拥有管理员权限，将看到额外的系统信息。\n\n"
-                "**N2S** 已准备好查询你的数据库。\n\n"
+                (
+                    "**🔒 Admin View** - You have admin privileges and will see additional system information.\n\n"
+                    "**N2S** is ready to query your database.\n\n"
+                )
+                if is_en
+                else (
+                    "**🔒 管理员视图** - 你拥有管理员权限，将看到额外的系统信息。\n\n"
+                    "**N2S** 已准备好查询你的数据库。\n\n"
+                )
             )
             setup_items = []
             setup_items.append("SQL ✓")
@@ -270,10 +282,14 @@ class DefaultWorkflowHandler(WorkflowHandler):
 
         if analysis["has_memory"]:
             content += (
-                "\n\n**Memory Management:** Tool and text memories are available. "
-                "As an admin, you can view and manage these memories to help me learn from successful queries."
-            ) if is_en else (
-                "\n\n**记忆管理：** 工具记忆和文本记忆已可用。作为管理员，你可以查看和管理这些记忆，帮助我学习成功的查询模式。"
+                (
+                    "\n\n**Memory Management:** Tool and text memories are available. "
+                    "As an admin, you can view and manage these memories to help me learn from successful queries."
+                )
+                if is_en
+                else (
+                    "\n\n**记忆管理：** 工具记忆和文本记忆已可用。作为管理员，你可以查看和管理这些记忆，帮助我学习成功的查询模式。"
+                )
             )
             actions.append(
                 {
@@ -304,21 +320,26 @@ class DefaultWorkflowHandler(WorkflowHandler):
 
         if not analysis["has_sql"]:
             content = (
-                "# Setup Required\n\n"
-                "N2S needs a SQL tool configured before it can help you analyze data."
-            ) if is_en else (
-                "# 需要配置\n\n"
-                "N2S 需要配置 SQL 工具后才能帮助你分析数据。"
+                (
+                    "# Setup Required\n\n"
+                    "N2S needs a SQL tool configured before it can help you analyze data."
+                )
+                if is_en
+                else ("# 需要配置\n\nN2S 需要配置 SQL 工具后才能帮助你分析数据。")
             )
         else:
             content = (
-                "# Welcome to N2S\n\n"
-                "I am your AI data analysis assistant. Ask me anything about your data in natural language!\n\n"
-                "Type `/help` to see what I can do."
-            ) if is_en else (
-                "# 欢迎使用 N2S\n\n"
-                "我是你的 AI 数据分析助手。用自然语言向我提问任何关于数据的问题！\n\n"
-                "输入 `/help` 查看我可以做什么。"
+                (
+                    "# Welcome to N2S\n\n"
+                    "I am your AI data analysis assistant. Ask me anything about your data in natural language!\n\n"
+                    "Type `/help` to see what I can do."
+                )
+                if is_en
+                else (
+                    "# 欢迎使用 N2S\n\n"
+                    "我是你的 AI 数据分析助手。用自然语言向我提问任何关于数据的问题！\n\n"
+                    "输入 `/help` 查看我可以做什么。"
+                )
             )
 
         return UiComponent(

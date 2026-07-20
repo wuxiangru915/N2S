@@ -291,9 +291,7 @@ class TestImportError:
             if "n2s.integrations.azureopenai.llm" in sys.modules:
                 del sys.modules["n2s.integrations.azureopenai.llm"]
 
-            with pytest.raises(
-                ImportError, match="pip install 'n2s\\[azureopenai\\]'"
-            ):
+            with pytest.raises(ImportError, match="pip install 'n2s\\[azureopenai\\]'"):
                 from n2s.integrations.azureopenai import AzureOpenAILlmService
 
                 AzureOpenAILlmService(
