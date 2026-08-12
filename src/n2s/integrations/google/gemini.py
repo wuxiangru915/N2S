@@ -339,8 +339,7 @@ class GeminiLlmService(LlmService):
                     self._call_counter += 1
                     self._tool_registry[call_id] = {
                         "name": fc.name,
-                        "signature": getattr(part, "thought_signature", None)
-                        or "",
+                        "signature": getattr(part, "thought_signature", None) or "",
                     }
                     tool_calls.append(
                         ToolCall(
