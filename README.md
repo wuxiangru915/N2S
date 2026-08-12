@@ -4,88 +4,48 @@
 
 **Turn natural language into SQL, execute it, and visualise results.**
 
-[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green?logo=opensourceinitiative&logoColor=white)](./LICENSE)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.68+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-261230?logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?logo=github)](./CONTRIBUTING.md)
-[![Tests](https://img.shields.io/badge/Tests-184%20passed-success)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-184%20passed-success)](#commands)
 
 [English](README.md) | [中文](README_CN.md)
 
 </div>
 
----
+N2S is a natural-language-to-SQL agent built on [Vanna](https://github.com/vanna-ai/vanna) 2.0. It inspects the database schema, generates SQL, executes it, and visualises the results — retrying automatically when SQL fails.
 
-N2S is an open-source **Natural Language to SQL to Insights** agent. Built on the [Vanna](https://github.com/vanna-ai/vanna) 2.0 agent framework, it extends the original with stronger tool-calling, multi-turn reasoning, a data ingestion pipeline, and a built-in Text2SQL benchmark.
-
-> N2S is a derivative project. It retains Vanna's MIT license and all original copyright notices. See [NOTICE](./NOTICE) for attribution.
+> Derivative project. Retains Vanna's MIT license and copyright notices, see [NOTICE](./NOTICE).
 
 ## Features
 
-- **Agent + Tool Calling** — The agent reasons over schema, generates SQL, executes it, and visualises results through an explicit tool loop.
-- **Self-Correction** — Failed SQL is captured and fed back to the LLM for automatic retry.
-- **Schema Introspection** — The agent inspects database schema before writing queries, reducing hallucination.
-- **Data Ingestion Pipeline** — Scan directories, read CSV/Excel/JSON/Parquet files, infer schema automatically, and load into the target database. Optional LLM-assisted schema enhancement with graceful degradation.
-- **Multi-Database Support** — SQLite, PostgreSQL, MySQL, DuckDB, ClickHouse, Oracle, BigQuery, Snowflake, MSSQL, Hive, Presto, and more via SQLAlchemy.
-- **Multi-LLM Providers** — Mock (no API key), OpenAI, Anthropic, Gemini, Ollama, and OpenAI-compatible endpoints (Agnes, Mimo).
-- **Built-in Benchmark** — `python -m n2s.eval` runs a reproducible Text2SQL evaluation and compares multiple LLM providers.
-- **One-Command Demo** — `python n2s_app.py` starts a FastAPI server with a web UI.
-
-## Screenshots
-
-### Login & Control Panel
-
-![Login Page](img/n2s-login.png)
-
-### Chat Interface
-
-![Chat Interface](img/n2s-chat.png)
+- **Tool-calling agent loop** — schema introspection → SQL generation → execution → visualisation; failed SQL is fed back to the LLM for retry
+- **Data ingestion pipeline** — scan a directory of CSV/Excel/JSON/Parquet files, auto-infer schema, load into the target database (LLM-assisted schema enhancement with graceful fallback)
+- **Multi-database** — SQLite, PostgreSQL, MySQL, DuckDB, ClickHouse, Oracle, BigQuery, Snowflake, MSSQL, Hive, Presto via SQLAlchemy
+- **Multi-LLM** — OpenAI, Anthropic, Gemini, Ollama, or any OpenAI-compatible endpoint (Agnes, Mimo); built-in `mock` for key-less demos
+- **Built-in Text2SQL benchmark** — reproducible evaluation across providers (`python -m n2s.eval`)
 
 ## Quick Start
 
-### 1. Install
+Requires Python 3.9+. The web UI bundle is committed to the repo — no Node.js needed.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/n2s.git
-cd n2s
+git clone https://github.com/wuxiangru915/N2S.git
+cd N2S
 pip install -e ".[fastapi]"
+python n2s_app.py    # open http://localhost:8000
 ```
 
-### 2. Run the mock demo (no API key required)
+The default `mock` provider answers canned questions against the bundled demo database (`employees`). For arbitrary questions, point `N2S_LLM_PROVIDER` at a real LLM:
 
 ```bash
-python n2s_app.py
-# Open http://localhost:8000
-```
-
-### 3. Run with a real LLM
-
-Supported providers: `mock` (default), `agnes`, `openai`, `anthropic`, `ollama`, `mimo`.
-
-```bash
-# OpenAI
-export N2S_LLM_PROVIDER=openai
-export OPENAI_API_KEY=sk-...
-python n2s_app.py
-
-# Anthropic
-export N2S_LLM_PROVIDER=anthropic
-export ANTHROPIC_API_KEY=sk-ant-...
-python n2s_app.py
-
-# Ollama (local)
-export N2S_LLM_PROVIDER=ollama
-export OLLAMA_MODEL=llama3.1
+export N2S_LLM_PROVIDER=agnes
+export AGNES_API_KEY=...
+export AGNES_BASE_URL=https://api.deepseek.com/v1   # any OpenAI-compatible endpoint
+export AGNES_MODEL=deepseek-chat
 python n2s_app.py
 ```
 
-### 4. Docker
-
-```bash
-docker-compose up --build
-# Open http://localhost:8000
-```
+Other providers (`openai`, `anthropic`, `gemini`, `ollama`, `mimo`) and their env vars are listed in [`.env.example`](.env.example) and the table below.
 
 ## Architecture
 
@@ -198,31 +158,43 @@ Directory / File
                                     └──────────────┘
 ```
 
-## Benchmark
+## Screenshots
 
-Evaluate N2S on a Text2SQL dataset:
+### Login
 
-```bash
-python -m n2s.eval \
-  --dataset src/n2s/eval/datasets/n2s_sql.yaml \
-  --providers mock openai anthropic
-```
+![Login](img/n2s-login.png)
 
-The report includes:
+### Chat & data visualisation
 
-| Metric | Description |
-|--------|-------------|
-| Trajectory | Did the agent call the expected tools? |
-| Output | Does the final answer contain expected keywords? |
-| SQL Similarity | Does the generated SQL match the reference? |
-| SQL Execution | Does the SQL execute and return the expected result? |
+![Chat](img/n2s-chat.png)
 
-## Testing
+## Commands
 
-```bash
-# Run all unit tests (excludes integration tests requiring API keys)
-pytest tests/ -m "not integration and not anthropic and not openai and not azureopenai and not gemini and not ollama and not postgres and not mysql and not slow"
-```
+| Command | Description |
+|---------|-------------|
+| `python n2s_app.py` | Demo server (FastAPI + Web UI), port 8000 |
+| `python -m n2s.eval --providers openai anthropic gemini` | Text2SQL benchmark on the bundled dataset |
+| `python -m n2s.eval --dataset <yaml> --providers <...>` | Benchmark on a custom dataset |
+| `pytest tests/ -m "not integration and not anthropic and not openai and not azureopenai and not gemini and not ollama and not postgres and not mysql and not slow"` | Unit tests (184 passed) |
+
+## Supported LLM Providers
+
+| Provider | Type | API key | Status |
+|----------|------|---------|--------|
+| `mock` | built-in | no | ✅ verified |
+| `agnes` | OpenAI-compatible | yes | ✅ verified |
+| `openai` | cloud | yes | ✅ verified |
+| `gemini` | cloud | yes | ✅ verified |
+| `anthropic` | cloud | yes | code present |
+| `mimo` | OpenAI-compatible | yes | code present |
+| `ollama` | local | no | code present |
+
+## Supported Databases (via SQLAlchemy)
+
+| Database | Status |
+|----------|--------|
+| SQLite, PostgreSQL, MySQL | ✅ verified |
+| DuckDB, ClickHouse, Oracle, BigQuery, Snowflake, MSSQL, Hive, Presto | code present, untested |
 
 ## Project Structure
 
@@ -254,24 +226,6 @@ n2s/
 ├── docker-compose.yml     # Docker deployment
 └── .env.example           # Environment variable template
 ```
-
-## Supported LLM Providers
-
-| Provider | Type | Requires API Key | Description |
-|----------|------|-------------------|-------------|
-| `mock` | Built-in | No | Deterministic mock response, for testing |
-| `openai` | Cloud | Yes | OpenAI GPT models |
-| `anthropic` | Cloud | Yes | Anthropic Claude models |
-| `gemini` | Cloud | Yes | Google Gemini models |
-| `ollama` | Local | No | Local Ollama server |
-
-## Supported Databases
-
-SQLite, PostgreSQL, MySQL, DuckDB, ClickHouse, Oracle, BigQuery, Snowflake, MS SQL Server, Hive, Presto (via SQLAlchemy).
-
-## Acknowledgements
-
-N2S is built on [Vanna](https://github.com/vanna-ai/vanna) by Vanna.AI and contributors, used under the MIT License.
 
 ## License
 

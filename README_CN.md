@@ -4,88 +4,48 @@
 
 **将自然语言转换为 SQL，执行查询，并可视化结果。**
 
-[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green?logo=opensourceinitiative&logoColor=white)](./LICENSE)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.68+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-261230?logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?logo=github)](./CONTRIBUTING.md)
-[![Tests](https://img.shields.io/badge/Tests-184%20passed-success)](#测试)
+[![Tests](https://img.shields.io/badge/Tests-184%20passed-success)](#常用命令)
 
 [English](README.md) | [中文](README_CN.md)
 
 </div>
 
----
+N2S 是基于 [Vanna](https://github.com/vanna-ai/vanna) 2.0 构建的自然语言转 SQL 智能体：检查数据库 schema，生成 SQL，执行查询并可视化结果，SQL 失败时自动重试。
 
-N2S 是一个开源的**自然语言转 SQL**智能体。基于 [Vanna](https://github.com/vanna-ai/vanna) 2.0 智能体框架构建，在原版基础上增强了工具调用、多轮推理、数据导入管道和内置 Text2SQL 基准测试。
-
-> N2S 是衍生项目，保留了 Vanna 的 MIT 许可证和所有原始版权声明。归属信息详见 [NOTICE](./NOTICE)。
+> 衍生项目，保留 Vanna 的 MIT 许可证与版权声明，见 [NOTICE](./NOTICE)。
 
 ## 功能特性
 
-- **智能体 + 工具调用** — 智能体推理数据库 schema，生成 SQL，执行查询，并通过工具循环可视化结果。
-- **自动纠错** — SQL 执行失败时，错误信息会反馈给 LLM 进行自动重试。
-- **Schema 内省** — 智能体在编写查询前先检查数据库结构，降低幻觉风险。
-- **数据导入管道** — 扫描目录，读取 CSV/Excel/JSON/Parquet 文件，自动推断 schema，加载到目标数据库。支持 LLM 辅助 schema 增强，LLM 不可用时自动降级。
-- **多数据库支持** — SQLite、PostgreSQL、MySQL、DuckDB、ClickHouse、Oracle、BigQuery、Snowflake、MSSQL、Hive、Presto 等，通过 SQLAlchemy 统一接入。
-- **多 LLM 提供商** — Mock（无需 API Key）、OpenAI、Anthropic、Gemini、Ollama、以及 OpenAI 兼容端点（Agnes、Mimo）。
-- **内置基准测试** — `python -m n2s.eval` 运行可复现的 Text2SQL 评测，对比多个 LLM 提供商。
-- **一键启动 Demo** — `python n2s_app.py` 启动带 Web UI 的 FastAPI 服务器。
-
-## 截图
-
-### 登录与控制面板
-
-![登录页面](img/n2s-login.png)
-
-### 聊天界面
-
-![聊天界面](img/n2s-chat.png)
+- **智能体工具循环** — schema 内省 → SQL 生成 → 执行 → 可视化；SQL 失败自动反馈 LLM 重试
+- **数据导入管道** — 扫描目录中的 CSV/Excel/JSON/Parquet 文件，自动推断 schema 并导入目标库（LLM 增强 schema 描述，不可用时自动降级）
+- **多数据库** — SQLite、PostgreSQL、MySQL、DuckDB、ClickHouse、Oracle、BigQuery、Snowflake、MSSQL、Hive、Presto（SQLAlchemy 统一接入）
+- **多 LLM** — OpenAI、Anthropic、Gemini、Ollama 及任意 OpenAI 兼容端点（Agnes、Mimo）；内置 `mock` 无需 API Key
+- **内置 Text2SQL 基准测试** — `python -m n2s.eval` 可复现评测、跨提供商对比
 
 ## 快速开始
 
-### 1. 安装
+需要 Python 3.9+。Web UI 构建产物已随仓库提交，无需 Node.js。
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/n2s.git
-cd n2s
+git clone https://github.com/wuxiangru915/N2S.git
+cd N2S
 pip install -e ".[fastapi]"
+python n2s_app.py    # 打开 http://localhost:8000
 ```
 
-### 2. 运行 Mock Demo（无需 API Key）
+默认 `mock` 提供商针对内置 demo 库（`employees`）按预置问题回答。接入真实 LLM：
 
 ```bash
-python n2s_app.py
-# 打开 http://localhost:8000
-```
-
-### 3. 使用真实 LLM
-
-支持的提供商：`mock`（默认）、`agnes`、`openai`、`anthropic`、`ollama`、`mimo`。
-
-```bash
-# OpenAI
-export N2S_LLM_PROVIDER=openai
-export OPENAI_API_KEY=sk-...
-python n2s_app.py
-
-# Anthropic
-export N2S_LLM_PROVIDER=anthropic
-export ANTHROPIC_API_KEY=sk-ant-...
-python n2s_app.py
-
-# Ollama（本地）
-export N2S_LLM_PROVIDER=ollama
-export OLLAMA_MODEL=llama3.1
+export N2S_LLM_PROVIDER=agnes
+export AGNES_API_KEY=...
+export AGNES_BASE_URL=https://api.deepseek.com/v1   # 任意 OpenAI 兼容端点
+export AGNES_MODEL=deepseek-chat
 python n2s_app.py
 ```
 
-### 4. Docker 部署
-
-```bash
-docker-compose up --build
-# 打开 http://localhost:8000
-```
+其余提供商（`openai`、`anthropic`、`gemini`、`ollama`、`mimo`）的环境变量见 [`.env.example`](.env.example) 与下方表格。
 
 ## 架构图
 
@@ -197,31 +157,43 @@ docker-compose up --build
                                     └──────────────┘
 ```
 
-## 基准测试
+## 截图
 
-在 Text2SQL 数据集上评估 N2S：
+### 登录
 
-```bash
-python -m n2s.eval \
-  --dataset src/n2s/eval/datasets/n2s_sql.yaml \
-  --providers mock openai anthropic
-```
+![登录](img/n2s-login.png)
 
-报告包含以下指标：
+### 对话与数据可视化
 
-| 指标 | 说明 |
+![聊天](img/n2s-chat.png)
+
+## 常用命令
+
+| 命令 | 说明 |
 |------|------|
-| Trajectory（轨迹） | 智能体是否调用了预期的工具 |
-| Output（输出） | 最终回答是否包含预期关键词 |
-| SQL Similarity（SQL 相似度） | 生成的 SQL 是否匹配参考 SQL |
-| SQL Execution（SQL 执行） | SQL 执行后是否返回预期结果 |
+| `python n2s_app.py` | 启动 Demo 服务（FastAPI + Web UI），端口 8000 |
+| `python -m n2s.eval --providers openai anthropic gemini` | 在自带数据集上运行 Text2SQL 评测 |
+| `python -m n2s.eval --dataset <yaml> --providers <...>` | 在自定义数据集上评测 |
+| `pytest tests/ -m "not integration and not anthropic and not openai and not azureopenai and not gemini and not ollama and not postgres and not mysql and not slow"` | 单元测试（184 passed） |
 
-## 测试
+## 支持的 LLM 提供商
 
-```bash
-# 运行所有单元测试（不含需要 API Key 的集成测试）
-pytest tests/ -m "not integration and not anthropic and not openai and not azureopenai and not gemini and not ollama and not postgres and not mysql and not slow"
-```
+| 提供商 | 类型 | API Key | 状态 |
+|--------|------|---------|------|
+| `mock` | 内置 | 否 | ✅ 已验证 |
+| `agnes` | OpenAI 兼容 | 是 | ✅ 已验证 |
+| `openai` | 云端 | 是 | ✅ 已验证 |
+| `gemini` | 云端 | 是 | ✅ 已验证 |
+| `anthropic` | 云端 | 是 | 有代码，未实测 |
+| `mimo` | OpenAI 兼容 | 是 | 有代码，未实测 |
+| `ollama` | 本地 | 否 | 有代码，未实测 |
+
+## 支持的数据库（SQLAlchemy 接入）
+
+| 数据库 | 状态 |
+|--------|------|
+| SQLite、PostgreSQL、MySQL | ✅ 已验证 |
+| DuckDB、ClickHouse、Oracle、BigQuery、Snowflake、MSSQL、Hive、Presto | 有代码，未实测 |
 
 ## 项目结构
 
@@ -253,24 +225,6 @@ n2s/
 ├── docker-compose.yml     # Docker 部署
 └── .env.example           # 环境变量模板
 ```
-
-## 支持的 LLM 提供商
-
-| 提供商 | 类型 | 需要 API Key | 说明 |
-|--------|------|-------------|------|
-| `mock` | 内置 | 否 | 确定性 Mock 响应，用于测试 |
-| `openai` | 云端 | 是 | OpenAI GPT 模型 |
-| `anthropic` | 云端 | 是 | Anthropic Claude 模型 |
-| `gemini` | 云端 | 是 | Google Gemini 模型 |
-| `ollama` | 本地 | 否 | 本地 Ollama 服务 |
-
-## 支持的数据库
-
-SQLite、PostgreSQL、MySQL、DuckDB、ClickHouse、Oracle、BigQuery、Snowflake、MS SQL Server、Hive、Presto（通过 SQLAlchemy 统一接入）。
-
-## 致谢
-
-N2S 基于 Vanna.AI 的 [Vanna](https://github.com/vanna-ai/vanna) 项目构建，遵循 MIT 许可证。
 
 ## 许可证
 
