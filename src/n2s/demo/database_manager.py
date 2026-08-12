@@ -7,6 +7,22 @@ import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlsplit, urlunsplit
+
+
+def redact_db_url(db_url: str) -> str:
+    """Replace the password inside a SQLAlchemy URL with '****'.
+
+    ``sqlite:///...`` URLs and URLs without credentials are returned unchanged.
+    """
+    parts = urlsplit(db_url)
+    if not parts.password:
+        return db_url
+    username = parts.username or ""
+    netloc = f"{username}:****@" + (parts.hostname or "")
+    if parts.port:
+        netloc += f":{parts.port}"
+    return urlunsplit((parts.scheme, netloc, parts.path, parts.query, parts.fragment))
 
 
 @dataclass
@@ -29,9 +45,19 @@ class DatabaseConfig:
         return d
 
     def to_safe_dict(self) -> dict:
-        """Serialize to dict without sensitive fields."""
+        """Serialize to dict without sensitive fields.
+
+        Keeps the full ``db_url`` (including password) for internal use
+        (e.g. recreating the agent). Use :meth:`to_public_dict` for
+        API responses exposed to the frontend.
+        """
         d = asdict(self)
-        # db_url may contain password; keep it for internal use but not in listing
+        return d
+
+    def to_public_dict(self) -> dict:
+        """Serialize to dict with the password redacted from ``db_url``."""
+        d = asdict(self)
+        d["db_url"] = redact_db_url(d.get("db_url", ""))
         return d
 
 
@@ -94,8 +120,8 @@ class DatabaseManager:
         return any(db.is_active for db in self._databases)
 
     def list_databases(self) -> list[dict]:
-        """Return all database configs as dicts."""
-        return [db.to_safe_dict() for db in self._databases]
+        """Return all database configs as dicts (password-redacted)."""
+        return [db.to_public_dict() for db in self._databases]
 
     def add_database(
         self,

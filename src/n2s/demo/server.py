@@ -36,10 +36,20 @@ def create_demo_app() -> FastAPI:
 
     app = FastAPI(title="N2S Demo", description="Natural-to-SQL Agent demo")
 
-    # Serve built frontend assets if available
-    config = {"dev_mode": True, "static_path": "/static"}
-    if FRONTEND_DIST.exists():
+    # Serve built frontend assets if available; otherwise fall back to the
+    # CDN build so the demo UI works out of the box (the frontend dist is
+    # built separately and is not committed to the repository).
+    has_frontend = FRONTEND_DIST.exists()
+    if has_frontend:
         app.mount("/static", StaticFiles(directory=str(FRONTEND_DIST)), name="static")
+
+    config = {"dev_mode": has_frontend, "static_path": "/static"}
+
+    @app.get("/health")
+    async def health():
+        """Health check endpoint (listed in the demo UI)."""
+        active = db_manager.get_active()
+        return {"status": "ok", "database": (active or {}).get("name", "none")}
 
     chat_handler = ChatHandler(agent)
     register_chat_routes(app, chat_handler, config=config)

@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from n2s.demo.agent import create_demo_agent
-from n2s.demo.database_manager import DatabaseManager
+from n2s.demo.database_manager import DatabaseManager, redact_db_url
 from n2s.servers.base import ChatHandler
 
 
@@ -66,6 +66,7 @@ def register_database_routes(
                 username=request.username,
                 password=request.password,
             )
+            config["db_url"] = redact_db_url(config.get("db_url", ""))
             return {"success": True, "database": config}
         except ValueError as e:
             return {"success": False, "error": str(e)}
@@ -91,12 +92,14 @@ def register_database_routes(
     async def set_active_database(request: SetActiveRequest):
         try:
             config = db_manager.set_active(request.name)
-            # Recreate agent with the new database
+            # Recreate agent with the new database (internal config keeps full URL)
             new_agent = create_demo_agent(
                 db_url=config["db_url"], llm_provider=llm_provider
             )
             chat_handler.agent = new_agent
-            return {"success": True, "database": config}
+            public_config = dict(config)
+            public_config["db_url"] = redact_db_url(public_config.get("db_url", ""))
+            return {"success": True, "database": public_config}
         except ValueError as e:
             return {"success": False, "error": str(e)}
 
@@ -104,7 +107,9 @@ def register_database_routes(
     async def get_active_database():
         active = db_manager.get_active()
         if active:
-            return active
+            public_active = dict(active)
+            public_active["db_url"] = redact_db_url(public_active.get("db_url", ""))
+            return public_active
         return {"error": "No active database"}
 
     @app.post("/api/databases/test")

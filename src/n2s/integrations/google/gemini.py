@@ -28,8 +28,8 @@ class GeminiLlmService(LlmService):
     """Google Gemini-backed LLM service.
 
     Args:
-        model: Gemini model name (e.g., "gemini-2.5-pro", "gemini-2.5-flash").
-            Defaults to "gemini-2.5-pro". Can also be set via GEMINI_MODEL env var.
+        model: Gemini model name (e.g., "gemini-flash-latest", "gemini-2.5-pro").
+            Defaults to "gemini-flash-latest". Can also be set via GEMINI_MODEL env var.
         api_key: API key; falls back to env `GOOGLE_API_KEY` or `GEMINI_API_KEY`.
             GOOGLE_API_KEY takes precedence if both are set.
         temperature: Temperature for generation (0.0-2.0). Default 0.7.
@@ -52,7 +52,7 @@ class GeminiLlmService(LlmService):
                 "Install with: pip install 'n2s[gemini]'"
             ) from e
 
-        self.model_name = model or os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
+        self.model_name = model or os.getenv("GEMINI_MODEL", "gemini-flash-latest")
         # Check GOOGLE_API_KEY first (takes precedence), then GEMINI_API_KEY
         api_key = api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 
@@ -72,6 +72,14 @@ class GeminiLlmService(LlmService):
         # Store generation config
         self.temperature = temperature
         self.extra_config = extra_config
+
+        # Registry mapping tool-call ids -> {name, thought_signature}.
+        # Newer Gemini models require the original thought_signature to be
+        # echoed back alongside the function_call when it is replayed in
+        # history; the core ToolCall model does not carry it, so we keep it
+        # here keyed by the generated call id.
+        self._tool_registry: Dict[str, Dict[str, str]] = {}
+        self._call_counter = 0
 
     async def send_request(self, request: LlmRequest) -> LlmResponse:
         """Send a non-streaming request to Gemini and return the response."""
@@ -151,22 +159,24 @@ class GeminiLlmService(LlmService):
                 if hasattr(chunk, "text") and chunk.text:
                     yield LlmStreamChunk(content=chunk.text)
 
-            # After stream completes, check for tool calls in accumulated response
-            if accumulated_chunks:
-                final_chunk = accumulated_chunks[-1]
-                _, tool_calls = self._parse_response_chunk(final_chunk)
+            # After stream completes, check for tool calls across ALL chunks
+            # (the function call may arrive in an intermediate chunk, not the last).
+            tool_calls: List[ToolCall] = []
+            finish_reason = None
+            for chunk in accumulated_chunks:
+                _, chunk_tool_calls = self._parse_response_chunk(chunk)
+                if chunk_tool_calls:
+                    tool_calls.extend(chunk_tool_calls)
+                if chunk.candidates:
+                    finish_reason = str(chunk.candidates[0].finish_reason).lower()
 
-                finish_reason = None
-                if final_chunk.candidates:
-                    finish_reason = str(final_chunk.candidates[0].finish_reason).lower()
-
-                if tool_calls:
-                    yield LlmStreamChunk(
-                        tool_calls=tool_calls,
-                        finish_reason=finish_reason,
-                    )
-                else:
-                    yield LlmStreamChunk(finish_reason=finish_reason or "stop")
+            if tool_calls:
+                yield LlmStreamChunk(
+                    tool_calls=tool_calls,
+                    finish_reason=finish_reason,
+                )
+            else:
+                yield LlmStreamChunk(finish_reason=finish_reason or "stop")
 
         except Exception as e:
             logger.error(f"Error streaming from Gemini API: {e}")
@@ -212,14 +222,17 @@ class GeminiLlmService(LlmService):
                 if m.content and m.content.strip():
                     parts.append(self._types.Part(text=m.content))
 
-                # Add tool calls if present
+                # Add tool calls if present, echoing the original
+                # thought_signature (required by newer Gemini models).
                 if m.tool_calls:
                     for tc in m.tool_calls:
+                        info = self._tool_registry.get(tc.id, {})
                         parts.append(
                             self._types.Part(
                                 function_call=self._types.FunctionCall(
                                     name=tc.name, args=tc.arguments
-                                )
+                                ),
+                                thought_signature=info.get("signature") or None,
                             )
                         )
 
@@ -227,7 +240,9 @@ class GeminiLlmService(LlmService):
                     contents.append(self._types.Content(role="model", parts=parts))
 
             elif m.role == "tool":
-                # Tool results in Gemini format
+                # Tool results in Gemini format. The current Gemini API rejects
+                # the legacy "function" role; function responses must be sent
+                # as a USER-role content with a function_response part.
                 if m.tool_call_id:
                     # Parse the content as JSON if possible
                     try:
@@ -235,12 +250,16 @@ class GeminiLlmService(LlmService):
                     except (json.JSONDecodeError, TypeError):
                         response_content = {"result": m.content}
 
-                    # Extract function name from tool_call_id or use a default
-                    function_name = m.tool_call_id.replace("call_", "")
+                    # Resolve the function name for this call id (registry has
+                    # the original name; fall back to the legacy heuristic).
+                    info = self._tool_registry.get(m.tool_call_id, {})
+                    function_name = info.get("name") or m.tool_call_id.replace(
+                        "call_", ""
+                    )
 
                     contents.append(
                         self._types.Content(
-                            role="function",
+                            role="user",
                             parts=[
                                 self._types.Part(
                                     function_response=self._types.FunctionResponse(
@@ -313,10 +332,19 @@ class GeminiLlmService(LlmService):
                 # Check for function calls
                 if hasattr(part, "function_call") and part.function_call:
                     fc = part.function_call
-                    # Convert function call to ToolCall
+                    # Convert function call to ToolCall. Use a unique id and
+                    # remember the original name + thought_signature so they can
+                    # be echoed back when the call is replayed in history.
+                    call_id = f"call_{fc.name}_{self._call_counter}"
+                    self._call_counter += 1
+                    self._tool_registry[call_id] = {
+                        "name": fc.name,
+                        "signature": getattr(part, "thought_signature", None)
+                        or "",
+                    }
                     tool_calls.append(
                         ToolCall(
-                            id=f"call_{fc.name}",  # Generate an ID
+                            id=call_id,  # Unique id for round-tripping
                             name=fc.name,
                             arguments=dict(fc.args) if hasattr(fc, "args") else {},
                         )

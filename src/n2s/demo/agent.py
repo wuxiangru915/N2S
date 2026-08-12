@@ -88,19 +88,48 @@ def _create_llm_service(provider: str | None = None) -> "LlmService":
             ),
         )
 
+    if provider == "gemini":
+        from n2s.integrations.google import GeminiLlmService
+
+        return GeminiLlmService(
+            model=os.getenv("GEMINI_MODEL", "gemini-flash-latest"),
+            api_key=os.getenv("GEMINI_API_KEY"),
+        )
+
     if provider == "mock":
+        # Canned SQL mode: lets the key-less demo exercise the full agent loop
+        # (tool call -> SQL execution -> final answer) against the bundled
+        # demo database (employees table).
         return MockLlmService(
             response_content=(
                 "N2S is running! This is a mock response. "
-                "Set N2S_LLM_PROVIDER=agnes (or openai/anthropic/ollama) to use a real LLM."
-            )
+                "Set N2S_LLM_PROVIDER=agnes (or openai/anthropic/gemini/ollama) to use a real LLM."
+            ),
+            canned_sql={
+                "多少条": "SELECT COUNT(*) AS total_count FROM employees",
+                "多少行": "SELECT COUNT(*) AS total_count FROM employees",
+                "员工总数": "SELECT COUNT(*) AS total_count FROM employees",
+                "部门": (
+                    "SELECT department, COUNT(*) AS cnt, AVG(salary) AS avg_salary "
+                    "FROM employees GROUP BY department ORDER BY avg_salary DESC"
+                ),
+                "工资": (
+                    "SELECT name, department, salary FROM employees "
+                    "ORDER BY salary DESC"
+                ),
+                "员工列表": "SELECT id, name, department, salary FROM employees ORDER BY id",
+            },
+            final_answer=(
+                "以上为 Mock 模式基于预置 SQL 的示例回答（查询已针对默认 demo 库 employees 表执行）。"
+                "设置 N2S_LLM_PROVIDER=agnes（或 openai/anthropic/gemini/ollama）后即可用真实 LLM 回答任意自然语言问题。"
+            ),
         )
 
     # Fallback: use mock
     return MockLlmService(
         response_content=(
             "N2S is running! This is a mock response. "
-            "Set N2S_LLM_PROVIDER=agnes (or openai/anthropic/ollama) to use a real LLM."
+            "Set N2S_LLM_PROVIDER=agnes (or openai/anthropic/gemini/ollama) to use a real LLM."
         )
     )
 

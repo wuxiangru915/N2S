@@ -47,7 +47,7 @@ async def test_gemini_initialization_without_key():
 
     try:
         with pytest.raises(ValueError, match="Google API key is required"):
-            llm = GeminiLlmService(model="gemini-2.5-pro")
+            llm = GeminiLlmService(model="gemini-flash-latest")
     finally:
         # Restore the keys if they existed
         if old_google_key:
@@ -64,7 +64,7 @@ async def test_gemini_initialization():
 
     # This test will be skipped by conftest.py if GOOGLE_API_KEY is not set
     llm = GeminiLlmService(
-        model="gemini-2.5-pro",
+        model="gemini-flash-latest",
         temperature=0.7,
     )
 
@@ -72,7 +72,7 @@ async def test_gemini_initialization():
     print(f"  Model: {llm.model_name}")
     print(f"  Temperature: {llm.temperature}")
 
-    assert llm.model_name == "gemini-2.5-pro"
+    assert llm.model_name == "gemini-flash-latest"
     assert llm.temperature == 0.7
 
 
@@ -82,7 +82,7 @@ async def test_gemini_basic_request(test_user):
     """Test a basic request without tools."""
     from n2s.integrations.google import GeminiLlmService
 
-    llm = GeminiLlmService(model="gemini-2.5-pro", temperature=0.0)
+    llm = GeminiLlmService(model="gemini-flash-latest", temperature=0.0)
 
     request = LlmRequest(
         user=test_user,
@@ -116,7 +116,7 @@ async def test_gemini_streaming_request(test_user):
     """Test streaming request."""
     from n2s.integrations.google import GeminiLlmService
 
-    llm = GeminiLlmService(model="gemini-2.5-pro", temperature=0.0)
+    llm = GeminiLlmService(model="gemini-flash-latest", temperature=0.0)
 
     request = LlmRequest(
         user=test_user,
@@ -151,7 +151,7 @@ async def test_gemini_validate_tools():
     from n2s.integrations.google import GeminiLlmService
 
     # For validation testing, we need to initialize but won't make API calls
-    llm = GeminiLlmService(model="gemini-2.5-pro")
+    llm = GeminiLlmService(model="gemini-flash-latest")
 
     # Valid tool
     valid_tool = ToolSchema(
