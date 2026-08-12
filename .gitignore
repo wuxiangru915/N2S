@@ -20,9 +20,12 @@ dist/
 
 # Frontend builds and dependencies
 frontends/**/node_modules/
-frontends/**/dist/
 frontends/**/static/
 frontends/**/.storybook-static/
+# The built web component bundle is committed so the demo works out of the box
+# (rebuild only when changing frontend code):
+!frontends/webcomponent/dist/
+!frontends/webcomponent/dist/**
 frontends/**/package-lock.json
 frontends/**/.mypy_cache/
 
